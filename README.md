@@ -1,40 +1,35 @@
-# ADS Tender SQM Calculator v12.7 (Mapping Wizard)
 
-This version adds a **mapping wizard** so you can use almost any tender layout:
+# Tender SQM Mapping Wizard – v13 (No Export Yet)
 
-- Choose the sheet inside the workbook
-- Map:
-  - Dimensions (mm)
-  - Total Annual Volume
-  - Print/Stock Specifications
-  - Lot ID (optional)
-  - Item Description (optional)
-  - Runs per annum (optional)
-- The app then normalizes the data and runs the full pricing engine.
+This version implements the new **concept flow**:
 
-Features:
+1. Upload Excel
+2. Preview each sheet
+3. Map columns in the UI:
+   - Stock/Material
+   - Size/Dimensions
+   - Quantity (annual)
+   - Double/Single sided (optional)
+   - Runs per annum (optional)
+   - Per-run qty (optional)
+   - Lot ID / Description (optional)
+4. Auto-generate material groups (with manual editing)
+5. Control over Double Sided? at line level
+6. Multi-panel area parsing (e.g. "2 x 2547mm x 755mm 2 x 967mm x 755mm")
+7. Tiered pricing per m² by annual quantity (3 tiers)
+8. Preview with:
+   - Area m² per item
+   - Total Area m²
+   - Price per m² (tiered)
+   - Double-sided loading
+   - Line Value (ex GST)
+   - Per-run metrics if runs are mapped
 
-- ADS orange + navy theme
-- ADS logo on the top-left (`ads_logo.png`)
-- Option B material grouping
-- Group + stock price memory (`price_memory.json`)
-- Double-sided loading logic (configurable %)
-- Multi-panel dimension parsing (e.g. "2 x 2547mm x 755mm 2 x 967mm x 755mm")
-- Per-annum and per-run calculations:
-  - Area m² per item
-  - Total Area m² per annum
-  - Area m² per run
-  - Line Value (ex GST) per annum
-  - Value per Run (ex GST)
-- KPI cards:
-  - Total Area (m² per annum)
-  - Total Value (ex GST)
-  - Average m² per Run
-  - Average Value per Run (ex GST)
-- Group preview with price and total value
-- Final calculated table and Excel export
+**Important:** Output/export is *not yet implemented* by design.
+Once the required output format is confirmed (which sheet/columns/prices
+need to be written), the export step can be added on top of this.
 
-## Install
+## Installation
 
 ```bash
 pip install -r requirements.txt

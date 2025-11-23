@@ -4,4 +4,3 @@ __pycache__/
 .vscode
 .DS_Store
 *_priced_v*.xlsx
-price_memory.json
