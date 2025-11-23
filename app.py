@@ -1,8 +1,6 @@
 
 import io
 import re
-from pathlib import Path
-
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -149,24 +147,56 @@ def get_tiered_rate(qty, tiers):
 # -----------------------------
 
 
-st.set_page_config(page_title="Tender SQM Mapping Wizard v13", layout="wide")
+st.set_page_config(page_title="Tender SQM Mapping Wizard v13.2", layout="wide")
+st.title("Tender SQM Mapping Wizard – v13.2 (Row/Column Auto-Detect)")
 
-st.title("Tender SQM Mapping Wizard – v13 (No Export Yet)")
 
 uploaded = st.file_uploader("1. Upload Excel file", type=["xlsx", "xls"])
 if not uploaded:
     st.stop()
 
 xls = pd.ExcelFile(uploaded)
-sheet_name = st.selectbox("2. Choose sheet to map", xls.sheet_names)
-df = xls.parse(sheet_name)
 
-st.markdown("#### Preview of selected sheet (first 30 rows)")
+sheet_name = st.selectbox("2. Choose sheet to map", xls.sheet_names)
+df_raw = xls.parse(sheet_name)
+
+st.markdown("#### Preview of raw sheet (first 30 rows)")
+st.dataframe(df_raw.head(30), use_container_width=True)
+
+# Auto-detect layout type based on shape
+rows, cols = df_raw.shape
+if rows >= cols * 2:
+    default_layout = "Row Based"
+elif cols >= rows * 2:
+    default_layout = "Column Based"
+else:
+    default_layout = "Row Based"
+
+layout_type = st.radio(
+    "3. Is this sheet Row-based or Column-based?",
+    ["Row Based", "Column Based"],
+    index=0 if default_layout == "Row Based" else 1,
+    help=(
+        "Row-based = each tender item is a ROW.
+"
+        "Column-based = each tender item is a COLUMN (the sheet will be transposed for mapping)."
+    ),
+)
+
+# Normalise structure for mapping
+if layout_type == "Row Based":
+    df = df_raw.copy()
+else:
+    df = df_raw.T.copy()
+    # Give generic column names after transpose
+    df.columns = [f"Col_{i}" for i in range(1, len(df.columns) + 1)]
+
+st.markdown("#### 4. Normalised view used for mapping (first 30 rows)")
 st.dataframe(df.head(30), use_container_width=True)
 
 cols = df.columns.tolist()
 
-st.markdown("### 3. Map columns to fields")
+st.markdown("### 5. Map columns to fields")
 
 col1, col2 = st.columns(2)
 with col1:
@@ -184,10 +214,13 @@ with col3:
 with col4:
     desc_col = st.selectbox("Description column (optional)", ["<none>"] + cols)
 
-if not st.button("Apply mapping and continue"):
+if not st.button("6. Apply mapping and continue"):
     st.stop()
 
-# Build normalized data frame
+# -----------------------------
+# Build normalized data table
+# -----------------------------
+
 data = pd.DataFrame()
 data["Stock / Material"] = df[material_col]
 data["Dimensions"] = df[size_col]
@@ -227,7 +260,7 @@ if runs_col != "<none>":
 else:
     data["Area m² per Run"] = np.nan
 
-st.markdown("### 4. Grouping & double-sided control")
+st.markdown("### 7. Grouping & double-sided control")
 
 unique_materials = sorted([s for s in data["Stock / Material"].dropna().unique() if str(s).strip()])
 
@@ -296,7 +329,7 @@ edited_lines = st.data_editor(
 
 data["Double Sided?"] = edited_lines["Double Sided?"].fillna(False)
 
-st.markdown("### 5. Preview merged groups & sidedness")
+st.markdown("### 8. Preview merged groups & sidedness")
 
 group_summary = (
     data.groupby("Material Group")
@@ -314,7 +347,7 @@ group_summary["Total_Area_m2"] = group_summary["Total_Area_m2"].round(2)
 
 st.dataframe(group_summary, use_container_width=True)
 
-st.markdown("### 6. Pricing (with tiers) & preview")
+st.markdown("### 9. Pricing (with tiers) & preview")
 
 st.sidebar.header("Pricing controls")
 
@@ -399,4 +432,4 @@ with k1:
 with k2:
     st.metric("Total Value (ex GST)", fmt_money(total_value))
 
-st.info("Output/export is intentionally not implemented yet – once you define the required output structure, it can be added.")
+st.info("Export/download not implemented yet. Once you define the exact output format, we can add the Excel export step.")
