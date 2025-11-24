@@ -1,1 +1,1 @@
-v13.3 – Fixes string literal + adds auto-detect row/column.
+v13.4 with Excel-style preview rows/columns.
